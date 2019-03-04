@@ -1,0 +1,13 @@
+name: dumpster
+version: 0.1.0
+
+authors:
+  - Kim Burgess <kim@acaprojects.com>
+
+targets:
+  dumpster:
+    main: src/dumpster.cr
+
+crystal: 0.24.1
+
+license: MIT
