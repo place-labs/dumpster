@@ -26,16 +26,22 @@ struct Dumpster::HeapObject
     ARRAY
     BIGNUM
     CLASS
+    COMPLEX
     DATA
+    FILE
     FLOAT
     HASH
     ICLASS
+    MATCH
     MODULE
     NODE
     OBJECT
     REGEXP
+    RATIONAL
     ROOT
     STRING
+    STRUCT
+    SYMBOL
   end
 
   def hash
