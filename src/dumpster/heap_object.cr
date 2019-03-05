@@ -2,22 +2,22 @@ require "json"
 
 struct Dumpster::HeapObject
   JSON.mapping(
-    address: {type: Int64, converter: MemAddressConverter},
+    address: {type: UInt64, converter: MemAddressConverter},
     type: ObjectType,
-    class: {type: Int64?, converter: MemAddressConverter},
+    class: {type: UInt64?, converter: MemAddressConverter},
     file: String?,
     line: Int32?,
     generation: Int32?,
-    memsize: Int64,
+    memsize: Int32,
     name: String? # Only in CLASS objects
   )
 
   module MemAddressConverter
     def self.from_json(pull : JSON::PullParser)
-      pull.read_string.to_i64(prefix: true)
+      pull.read_string.to_u64(prefix: true)
     end
 
-    def self.to_json(value : Int64, json : JSON::Builder)
+    def self.to_json(value : UInt64, json : JSON::Builder)
       json.string("0x#{value.to_s(16)}")
     end
   end
