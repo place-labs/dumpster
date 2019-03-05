@@ -21,6 +21,7 @@ class Dumpster::HeapReader
   #
   # OPTIMIZE: replace with a Boyer-Moore search for address entries to find
   # offsets then calculate length on extraction only
+  # TODO: change to tuple with type and class extracted too
   def self.map(io : IO) : Hash(Address, Location)
       entries = io.each_line chomp: false
 

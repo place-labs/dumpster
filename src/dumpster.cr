@@ -6,7 +6,8 @@ include Dumpster
 OptionParser.parse! do |parser|
   parser.on("-d FILE", "--dump-file FILE", "Ruby heap dump file") do |path|
     File.open(path) do |file|
-      heap = Heap.new(file)
+      heap = Dumpster::HeapReader.new(file)
+      puts heap[0x7fb47763fbb8]
     end
   end
 
