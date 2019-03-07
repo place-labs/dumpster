@@ -1,74 +1,80 @@
 require "json"
 
+# Reprentation of entities contained in Ruby MRI heap dumps.
 struct Dumpster::Object
-  getter   address    : UInt64
-  getter   type       : Type
-  getter   class      : UInt64
-  property file       : String?
-  property line       : UInt32?
-  property generation : UInt32?
-  property memsize    : UInt32?
-  property name       : String?
+  JSON.mapping(
+    address:    { setter: false, type: UInt64,  converter: Addr               },
+    value_type: { setter: false, type: RubyVT,                   key: "type"  },
+    klass:      { setter: false, type: UInt64?, converter: Addr, key: "class" },
+    file:       { setter: false, type: String?                                },
+    line:       { setter: false, type: UInt32?                                },
+    generation: { setter: false, type: UInt32?                                },
+    memsize:    { setter: false, type: UInt32?                                },
+    name:       { setter: false, type: String?                                }
+  )
 
-  def inititialize(@address, @type, @class)
+  # See https://github.com/ruby/ruby/blob/7570864267cb258e2d29881e37cb3b8a6930727a/include/ruby/ruby.h#L485-L517
+  enum RubyVT
+    NONE
+
+    OBJECT
+    CLASS
+    MODULE
+    FLOAT
+    STRING
+    REGEXP
+    ARRAY
+    HASH
+    STRUCT
+    BIGNUM
+    FILE
+    DATA
+    MATCH
+    COMPLEX
+    RATIONAL
+
+    NIL
+    TRUE
+    FALSE
+    SYMBOL
+    FIXNUM
+    UNDEF
+
+    IMEMO
+    NODE
+    ICLASS
+    ZOMBIE
   end
 
-  # JSON.mapping(
-  #   address: {type: UInt64, converter: MemAddressConverter},
-  #   type: Type,
-  #   class: {type: UInt64?, converter: MemAddressConverter},
-  #   file: String?,
-  #   line: Int32?,
-  #   generation: Int32?,
-  #   memsize: Int32,
-  #   name: String? # Only in CLASS objects
-  # )
-  #
-  # def self.preparse(line : String)
-  #   new.tap do |o|
-  #     o.address = address
-  #     o.type    = object_type
-  #     o.class   = object_class
-  #   end
-  # end
-  #
-  # module MemAddressConverter
-  #   def self.from_json(pull : JSON::PullParser)
-  #     pull.read_string.to_u64(prefix: true)
-  #   end
-  #
-  #   def self.to_json(value : UInt64, json : JSON::Builder)
-  #     json.string("0x#{value.to_s(16)}")
-  #   end
-  # end
+  module Addr
+    extend self
 
-  enum Type
-    ARRAY
-    BIGNUM
-    CLASS
-    COMPLEX
-    DATA
-    FILE
-    FLOAT
-    HASH
-    ICLASS
-    MATCH
-    MODULE
-    NODE
-    OBJECT
-    REGEXP
-    RATIONAL
-    ROOT
-    STRING
-    STRUCT
-    SYMBOL
+    def from_s(string : String)
+      string.to_u64 prefix: true
+    end
+
+    def to_s(value : UInt64)
+      "0x#{value.to_s 16}"
+    end
+
+    def from_json(pull : JSON::PullParser)
+      from_s pull.read_string
+    end
+
+    def to_json(value : UInt64, json : JSON::Builder)
+      val = to_s value
+      json.string val
+    end
+  end
+
+  def initialize(@address, @value_type, @klass = nil)
   end
 
   def hash
     address
   end
 
-  def instantiated_at
+  def location
     "#{file}:#{line}" if file && line
   end
 end
