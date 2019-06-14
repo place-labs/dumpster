@@ -18,37 +18,33 @@ class Dumpster::Cli
   end
 
   def run
-    opt_parser = OptionParser.new
+    opts = OptionParser.new
 
-    opt_parser.banner = USAGE
+    opts.banner = USAGE
 
     quick = false
-    opt_parser.on("-q", "--quick", "Provide instance counts only.") do
+    opts.on("-q", "--quick", "Provide instance counts only.") do
       quick = true
     end
 
-    opt_parser.on("-V", "--verion", "Show version information.") do
+    opts.on("-V", "--verion", "Show version information.") do
       print_and_exit VERSION
     end
 
-    opt_parser.on("-h", "--help", "Print this help message.") do
-      print_and_exit opt_parser, include_header: true
+    opts.on("-h", "--help", "Print this help message.") do
+      print_and_exit opts, include_header: true
     end
 
-    opt_parser.invalid_option do |opt|
-      exit_with_error "unkown option '#{opt}'"
+    opts.invalid_option do |flag|
+      exit_with_error "unkown option '#{flag}'"
     end
 
     filename = "mem.dump"
-    opt_parser.unknown_args do |args|
-      case args.size
-      when 1 then filename = args.first
-      when 0 then exit_with_error "no dump file specified"
-      else        exit_with_error "only one mem dump may be parsed at a time"
-      end
+    opts.unknown_args do |args|
+      filename = args.first? || exit_with_error "no FILE specified"
     end
 
-    opt_parser.parse options
+    opts.parse options
 
     unless File.exists? filename
       exit_with_error "target FILE '#{filename}' does not exist"
