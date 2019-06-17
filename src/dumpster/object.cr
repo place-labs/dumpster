@@ -70,8 +70,13 @@ struct Dumpster::Object
   def initialize(@address, @value_type, @klass = nil)
   end
 
-  def hash
-    address
+   # See `Object#hash(hasher)`
+  def hash(hasher)
+    address.hash(hasher)
+  end
+
+  def ==(other : self)
+    address == other.address
   end
 
   def location
