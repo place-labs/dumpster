@@ -67,7 +67,7 @@ struct Dumpster::Object
     end
   end
 
-  def initialize(@address, @value_type, @klass = nil)
+  def initialize(@address, @value_type)
   end
 
    # See `Object#hash(hasher)`

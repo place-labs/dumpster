@@ -1,5 +1,6 @@
 require "./version"
 require "./parse"
+require "./heap_reader"
 require "option_parser"
 require "colorize"
 
@@ -54,8 +55,8 @@ class Dumpster::Cli
 
   private def print_heap_info(filename, quick = false)
     File.open(filename) do |file|
-      heap = Dumpster::Parse.heap(file)
-      puts heap[0x7fb47763fbb8]
+      heap = Dumpster::HeapReader.new(file, quick)
+      heap.first(20).each(&->puts(Dumpster::Object))
     end
   end
 

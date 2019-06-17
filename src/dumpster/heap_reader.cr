@@ -1,48 +1,60 @@
-# Pre-parser for Ruby heap memory dumps collected from the ObjectSpace module.
+require "./object"
+
+# Reader for Ruby heap memory dumps collected from the ObjectSpace module.
 #
 # Stored dump files are in the http://jsonlines.org/ format. These can contain
 # multiple gigabytes of data depending on the application being analysed. To
-# reduce the resource overhead required to parse these HeapReader provides a
-# an efficient method for memory addresses to their raw entries for lazy
-# parsing as required.
+# reduce the resource overhead required to parse these, HeapReader provides a
+# an efficient method for enumerating individual entries as a stream.
 class Dumpster::HeapReader
+  include Enumerable(Dumpster::Object)
+
   # Character range containing the mem address within dump file lines.
-  ADDRESS = 12..25
+  ADDRESS_POS = 12..25
 
-  alias Address  = UInt64
-  # FIXME: File::PReader does not currently support 64bit addresses. Underlying
-  # syscall does appear to though - may need to submit a PR.
-  alias Offset   = Int32 #| Int64
-  alias Length   = Int32
-  alias Location = {Offset, Length}
+  # Search string for marking the start of the value type definition.
+  VT_SEARCH = "\", \"type\":\""
 
-  # Given an IO containing a Ruby memory dump, build a map relating object
-  # addresses to the byte offset containing the object details.
-  #
-  # OPTIMIZE: replace with a Boyer-Moore search for address entries to find
-  # offsets then calculate length on extraction only
-  # TODO: change to tuple with type and class extracted too
-  def self.map(io : IO) : Hash(Address, Location)
-      entries = io.each_line chomp: false
+  # Terminator for value extractions.
+  SEARCH_END = "\", \""
 
-      # Skip initial unaddressed ROOT objects
-      entries = entries.skip_while { |line| line[2] != 'a' }
+  private getter io
+  private getter quick
 
-      entries.reduce({} of Address => Location) do |map, line|
-        address = line[ADDRESS].to_u64(prefix: true)
-        length  = line.bytesize
-        offset  = io.pos - length
-        map[address] = {offset.to_i32, length}
-        map
+  # TODO implemenent other filters
+  def initialize(@io : IO, @quick = false)
+  end
+
+  def each
+    entries = io.each_line chomp: false
+
+    # Skip initial unaddressed ROOT objects
+    entries = entries.skip_while { |line| line[2] != 'a' }
+
+    entries.each do |line|
+      if quick
+        yield quick_parse(line)
+      else
+        yield parse(line)
       end
+    end
   end
 
-  def initialize(@io : IO)
-    @entries = HeapReader.map @io
+  private def quick_parse(line)
+    address = line[ADDRESS_POS].to_u64 prefix: true
+
+    vt_pos = line.index(VT_SEARCH, ADDRESS_POS.end)
+    raise "unhandled entry format: \"#{line}\"" if vt_pos.nil?
+    vt_pos += VT_SEARCH.size
+    vt_end = line.index(SEARCH_END, vt_pos)
+    raise "unhandled entry format: \"#{line}\"" if vt_end.nil?
+    vt_len = vt_end - vt_pos
+    value_type = Dumpster::Object::RubyVT.parse line[vt_pos, vt_len]
+
+    Dumpster::Object.new(address, value_type)
   end
 
-  def [](address)
-    entry = @entries[address]
-    @io.read_at(*entry) { |io| io.gets_to_end }
+  private def parse(line)
+    Dumpster::Object.from_json(line)
   end
 end
