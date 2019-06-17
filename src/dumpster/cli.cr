@@ -39,16 +39,15 @@ class Dumpster::Cli
       exit_with_error "unkown option '#{flag}'"
     end
 
-    filename = "mem.dump"
+    filename = ""
     opts.unknown_args do |args|
       filename = args.first? || exit_with_error "no FILE specified"
+      unless File.exists? filename
+        exit_with_error "target FILE '#{filename}' does not exist"
+      end
     end
 
     opts.parse options
-
-    unless File.exists? filename
-      exit_with_error "target FILE '#{filename}' does not exist"
-    end
 
     print_heap_info filename, quick
   end
