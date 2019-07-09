@@ -1,5 +1,4 @@
 require "./version"
-require "./parse"
 require "./heap_reader"
 require "option_parser"
 require "colorize"
@@ -23,10 +22,10 @@ class Dumpster::Cli
 
     opts.banner = USAGE
 
-    quick = false
-    opts.on("-q", "--quick", "Provide instance counts only.") do
-      quick = true
-    end
+    # quick = false
+    # opts.on("-q", "--quick", "Provide instance counts only.") do
+    #   quick = true
+    # end
 
     opts.on("-V", "--verion", "Show version information.") do
       print_and_exit VERSION
@@ -50,25 +49,32 @@ class Dumpster::Cli
 
     opts.parse options
 
-    print_heap_info filename, quick
+    print_heap_info filename
   end
 
-  private def print_heap_info(filename, quick = false)
+  private def print_heap_info(filename)
     File.open(filename) do |file|
-      heap = Dumpster::HeapReader.new(file, quick)
-      heap.first(20).each(&->puts(Dumpster::Object))
+      heap = Dumpster::HeapReader.new file
+      heap.each.first(100).each(&->puts(Dumpster::Entry::Types))
+
+      # entries = file.each_line
+      #
+      # entries.first(10).each do |entry|
+      #   puts file.pos
+      #   puts entry
+      # end
     end
   end
 
   # Prints to STDOUT and exits
-  private def print_and_exit(message, include_header = false, exit_code = 0)
+  private def print_and_exit(message, include_header = false, exit_code = 0) : NoReturn
     message = "#{VERSION}\n#{ABOUT}\n\n#{message}" if include_header
     STDOUT.puts message
     exit exit_code
   end
 
   # Prints to STDERR and exits
-  private def exit_with_error(message, exit_code = 1)
+  private def exit_with_error(message, exit_code = 1) : NoReturn
     STDERR.puts "#{"error:".colorize.bright.red} #{message}"
     exit exit_code
   end
