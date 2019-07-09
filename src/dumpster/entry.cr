@@ -5,15 +5,20 @@ module Dumpster::Entry
   # Character offset for the start of the "type" field (for non-root entries).
   VT_START_POS = 37
 
-  alias Types = Dumpster::Entry::Class | Dumpster::Entry::Object
+  # Union of parseable entry types.
+  alias Types = Entry::Object |
+                Entry::Class
 
-  def self.from_json(line : String) : Types?
-    entry = case line[VT_START_POS]
-            when 'O' then Dumpster::Entry::Object
-            when 'C' then Dumpster::Entry::Class
-            else return
-            end
+  # Parse an single line of a mem dump into its associated entry struct.
+  def self.parse(line : String) : Types?
+    entry_type_of(line).try &.from_json(line)
+  end
 
-    entry.from_json line
+  # Infer the type of a line based on it's raw String form.
+  def self.entry_type_of(line : String)
+    case line[VT_START_POS]
+    when 'O' then Entry::Object
+    when 'C' then Entry::Class
+    end
   end
 end

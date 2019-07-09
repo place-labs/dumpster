@@ -1,6 +1,7 @@
 require "json"
 
-abstract struct Dumpster::Entry::Base
+# Common method and modules to be included in all entry structs.
+module Dumpster::Entry::Common
   # Utility module for reading memory address fields.
   module Address
     extend self

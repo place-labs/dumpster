@@ -1,6 +1,8 @@
-require "./base"
+require "./common"
 
-struct Dumpster::Entry::Object < Dumpster::Entry::Base
+struct Dumpster::Entry::Object
+  include Common
+
   JSON.mapping(
     address: { setter: false, type: UInt64, converter: Address                },
     klass:   { setter: false, type: UInt64, converter: Address, key: "class"  },

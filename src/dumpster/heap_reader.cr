@@ -16,6 +16,6 @@ class Dumpster::HeapReader
 
   # Perform a single pass across the IO, emitting entries as they are parsed.
   def each
-    io.each_line.compact_map(&->Dumpster::Entry.from_json(String))
+    io.each_line.compact_map(&->Dumpster::Entry.parse(String))
   end
 end
