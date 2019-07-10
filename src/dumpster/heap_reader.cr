@@ -51,19 +51,21 @@ class Dumpster::HeapReader
   # Spawn a set of `count` fibers. Each of these will pull lines from
   # `input_channel`, parse them and pipe into the returned channel.
   private def spawn_parsers(input_channel, count)
-    output_channel = Channel(Dumpster::Entry::Types).new count
+    output_channel = Channel(Entry::Types).new count
 
     count.times do
       spawn do
-        until input_channel.closed? && input_channel.empty?
-          begin
-            line  = input_channel.receive
-            entry = Dumpster::Entry.parse line
-            output_channel.send entry unless entry.nil?
-          rescue Channel::ClosedError
-            # Nothing to do, one of the other fibers already finished the read.
+        begin
+          loop do
+            input_channel
+              .receive
+              .try(&->Entry.parse(String))
+              .try(&->output_channel.send(Entry::Types))
           end
+        rescue Channel::ClosedError
+          # Nothing to do, one of the other fibers already finished the read.
         end
+
         output_channel.close
       end
     end
