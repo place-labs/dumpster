@@ -5,6 +5,6 @@ struct Dumpster::Entry::Class
 
   JSON.mapping(
     address: { setter: false, type: UInt64, converter: Address                },
-    name:    { setter: false, type: String                                    }
+    name:    { setter: false, type: String?                                   }
   )
 end
