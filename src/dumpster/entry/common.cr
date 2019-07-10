@@ -24,7 +24,7 @@ module Dumpster::Entry::Common
     end
   end
 
-   # See `Object#hash(hasher)`
+  # See `Object#hash(hasher)`
   def hash(hasher)
     address.hash(hasher)
   end

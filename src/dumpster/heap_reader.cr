@@ -35,8 +35,8 @@ class Dumpster::HeapReader
     io.rewind
   end
 
-  # Spawn a fiber that will read from the wrapped IO and pipe lines into the
-  # returned channel.
+  # Spawn a fiber that will lazilly read from the wrapped `IO` and pipe lines
+  # into a `BufferedChannel` of size *buffer_len*.
   private def spawn_line_reader(buffer_len)
     output_channel = Channel(String).new buffer_len
 
@@ -48,8 +48,16 @@ class Dumpster::HeapReader
     output_channel
   end
 
-  # Spawn a set of `count` fibers. Each of these will pull lines from
-  # `input_channel`, parse them and pipe into the returned channel.
+  # Spawn a set of *count* concurrent parsers and return a `BufferedChannel` of
+  # entry structs.
+  #
+  # Each parser will pull lines from *input_channel*, parse these and pipe the
+  # results into the returned channel.
+  #
+  # NOTE: parallel operations are not currently supported. This is
+  # pre-emptively implemented to take advantage executation across a thread
+  # pool when available. Based on current information this **should** work with
+  # no / minimal changes, but might need some love at a future date.
   private def spawn_parsers(input_channel, count)
     output_channel = Channel(Entry::Types).new count
 
