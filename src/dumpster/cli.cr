@@ -55,7 +55,8 @@ class Dumpster::Cli
   private def print_heap_info(filename)
     File.open(filename) do |file|
       heap = Dumpster::HeapReader.new file
-      heap.each.first(100).each(&->puts(Dumpster::Entry::Types))
+      # heap.each(&->puts(Dumpster::Entry::Types))
+      heap.each { }
 
       # entries = file.each_line
       #
