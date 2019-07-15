@@ -1,5 +1,5 @@
 require "./version"
-require "./heap_reader"
+require "./analyser"
 require "option_parser"
 require "colorize"
 
@@ -49,14 +49,9 @@ class Dumpster::Cli
 
     opts.parse options
 
-    print_heap_info filename
-  end
-
-  private def print_heap_info(filename)
     File.open(filename) do |file|
-      heap = Dumpster::HeapReader.new file
-      # heap.each(&->puts(Dumpster::Entry::Types))
-      heap.each { }
+      analyser = Analyser.parse file
+      print_heap_info analyser
 
       # entries = file.each_line
       #
@@ -65,6 +60,14 @@ class Dumpster::Cli
       #   puts entry
       # end
     end
+  end
+
+  private def print_heap_info(heap : Analyser, io = STDOUT)
+    io.puts <<-SUMMARY
+    Found #{heap.num_of_objects} objects
+    Built from #{heap.num_of_classes} classes
+    Using -Mb of memory
+    SUMMARY
   end
 
   # Prints to STDOUT and exits
