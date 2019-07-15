@@ -36,14 +36,14 @@ class Dumpster::Cli
     end
 
     opts.invalid_option do |flag|
-      exit_with_error "unkown option '#{flag}'"
+      exit_with_error "unkown option '#{flag}'", exit_code: 22
     end
 
     filename = ""
     opts.unknown_args do |args|
-      filename = args.first? || exit_with_error "no FILE specified"
+      filename = args.first? || exit_with_error "no FILE specified", exit_code: 22
       unless File.exists? filename
-        exit_with_error "target FILE '#{filename}' does not exist"
+        exit_with_error "target FILE '#{filename}' does not exist", exit_code: 2
       end
     end
 
@@ -71,14 +71,14 @@ class Dumpster::Cli
   end
 
   # Prints to STDOUT and exits
-  private def print_and_exit(message, include_header = false, exit_code = 0) : NoReturn
+  private def print_and_exit(message, include_header = false) : NoReturn
     message = "#{VERSION}\n#{ABOUT}\n\n#{message}" if include_header
     STDOUT.puts message
-    exit exit_code
+    exit
   end
 
   # Prints to STDERR and exits
-  private def exit_with_error(message, exit_code = 1) : NoReturn
+  private def exit_with_error(message, exit_code) : NoReturn
     STDERR.puts "#{"error:".colorize.bright.red} #{message}"
     exit exit_code
   end
