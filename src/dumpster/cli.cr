@@ -1,5 +1,6 @@
 require "./version"
 require "./analyser"
+require "../lib/terminimal"
 require "option_parser"
 require "colorize"
 
@@ -49,16 +50,20 @@ class Dumpster::Cli
 
     opts.parse options
 
-    File.open(filename) do |file|
-      analyser = Analyser.parse file
-      print_heap_info analyser
+    Terminimal.hide_cursor
 
-      # entries = file.each_line
-      #
-      # entries.first(10).each do |entry|
-      #   puts file.pos
-      #   puts entry
-      # end
+    File.open(filename) do |file|
+      analyser = future { Analyser.parse file }
+
+      spinner = ('◢'..'◥').cycle.each
+      until analyser.completed?
+        percent_read = (file.pos.to_f / file.size) * 100
+        print "#{spinner.next} Analysing (#{percent_read.to_i}%)"
+        sleep 0.15
+        Terminimal.clear_line
+      end
+
+      print_heap_info analyser.get
     end
   end
 

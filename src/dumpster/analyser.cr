@@ -5,7 +5,7 @@ class Dumpster::Analyser
 
   # Parses *io* and extracts analysis data.
   def self.parse(io)
-    new(io).tap &.parse
+    new(io).parse
   end
 
   private def initialize(io)
@@ -26,7 +26,9 @@ class Dumpster::Analyser
       else
         raise "Unhandled entry type"
       end
+      Fiber.yield
     end
+    self
   end
 
   # Gets the total number of objects contained in the heap dump.
