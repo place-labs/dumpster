@@ -64,9 +64,9 @@ class Dumpster::Cli
 
   private def print_heap_info(heap : Analyser, io = STDOUT)
     io.puts <<-SUMMARY
-    Found #{heap.num_of_objects} objects
-    Built from #{heap.num_of_classes} classes
-    Using -Mb of memory
+    Found #{heap.object_count} objects
+    Built from #{heap.class_count} classes
+    Using #{heap.object_memsize >> 20}MiB of memory
     SUMMARY
   end
 
