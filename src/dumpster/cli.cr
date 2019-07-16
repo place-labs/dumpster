@@ -50,7 +50,7 @@ class Dumpster::Cli
 
     opts.parse options
 
-    Terminimal.hide_cursor
+    Terminimal.cursor.hide
 
     File.open(filename) do |file|
       analyser = future { Analyser.parse file }
