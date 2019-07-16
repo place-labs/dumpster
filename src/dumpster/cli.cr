@@ -1,6 +1,6 @@
 require "./version"
 require "./analyser"
-require "../lib/terminimal"
+require "terminimal"
 require "option_parser"
 require "colorize"
 
