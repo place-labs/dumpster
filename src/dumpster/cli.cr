@@ -60,7 +60,7 @@ class Dumpster::Cli
         percent_read = (file.pos.to_f / file.size) * 100
         print "#{spinner.next} Analysing (#{percent_read.to_i}%)"
         sleep 0.15
-        Terminimal.clear_line
+        Terminimal.reset_line
       end
 
       print_heap_info analyser.get
