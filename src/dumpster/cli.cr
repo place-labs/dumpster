@@ -42,14 +42,14 @@ class Dumpster::Cli
     end
 
     opts.invalid_option do |flag|
-      Terminimal.abort "unkown option '#{flag}'", Errno::EINVAL
+      Terminimal.exit_with_error "unkown option '#{flag}'", Errno::EINVAL
     end
 
     filename = ""
     opts.unknown_args do |args|
-      filename = args.first? || Terminimal.abort "no FILE specified", Errno::EINVAL
+      filename = args.first? || Terminimal.exit_with_error "no FILE specified", Errno::EINVAL
       unless File.exists? filename
-        Terminimal.abort "target FILE '#{filename}' does not exist", Errno::ENOENT
+        Terminimal.exit_with_error "target FILE '#{filename}' does not exist", Errno::ENOENT
       end
     end
 
