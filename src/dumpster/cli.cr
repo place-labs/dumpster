@@ -60,12 +60,9 @@ class Dumpster::Cli
     File.open(filename) do |file|
       analyser = future { Analyser.parse file }
 
-      spinner = ('◢'..'◥').cycle.each
-      until analyser.completed?
-        percent_read = (file.pos.to_f / file.size) * 100
-        print "#{spinner.next} Analysing (#{percent_read.to_i}%)"
-        sleep 0.15
-        Terminimal.reset_line
+      Terminimal.spinner await: analyser do
+        percent_read = ((file.pos.to_f / file.size) * 100).to_i
+        "Analysing (#{percent_read}%)"
       end
 
       print_heap_info analyser.get
