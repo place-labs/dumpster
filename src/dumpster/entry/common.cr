@@ -37,4 +37,18 @@ module Dumpster::Entry::Common
   def ==(other : self)
     address == other.address
   end
+
+  macro included
+    # Returns the type of this entry
+    def type
+      {{ @type.name.id.split("::").last }}
+    end
+  end
+
+  # Default generation
+  #
+  # NOTE: This is overridden by entry types which support generation tracking.
+  def generation
+    nil
+  end
 end

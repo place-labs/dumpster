@@ -71,8 +71,8 @@ class Dumpster::Cli
 
   private def print_heap_info(heap : Analyser, io = STDOUT)
     io.puts <<-SUMMARY
-    Found #{heap.object_count} objects
-    Built from #{heap.class_count} classes
+    Parsed #{heap.object_count} objects
+    Across #{heap.generation_count} generations
     SUMMARY
   end
 end
