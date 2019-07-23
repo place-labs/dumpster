@@ -20,13 +20,18 @@ class Dumpster::Analyser
 
   private def initialize(io)
     @heap = HeapReader.new io
+
     @object_count = 0
-    @classes = {} of UInt64 => String? # Address => Name
-    @stats = GenerationStats.new do |stats, gen|
-      stats[gen] = {
-        LocationCounter.new { |h, k| h[k] = 0 },
-        InstanceCounter.new { |h, k| h[k] = 0 }
-      }
+
+    # Address => Name
+    @classes = {} of UInt64 => String?
+
+    # Autoviv stats counters
+    @location_counts = Hash(Generation, LocationCounter).new do |h, gen|
+      h[gen] = LocationCounter.new { |h, k| h[k] = 0 }
+    end
+    @instance_counts = Hash(Generation, InstanceCounter).new do |h, gen|
+      h[gen] = InstanceCounter.new { |h, k| h[k] = 0 }
     end
   end
 
@@ -34,6 +39,7 @@ class Dumpster::Analyser
     heap.each do |entry|
       @object_count += 1
 
+      generation = entry.generation || 0_u32
       object_type = entry.type
 
       case entry
@@ -44,19 +50,21 @@ class Dumpster::Analyser
         @classes[entry.address] = entry.name
       end
 
-      locations, instances = @stats[entry.generation || 0_u32]
+      # Associate entries by generation and form counts of the points of
+      # instantiation (locations) and instance types created (instances).
 
       if entry.responds_to?(:location)
         location = entry.location
         unless location.nil?
-          locations[{object_type, location}] += 1
+          @location_counts[generation][{object_type, location}] += 1
         end
       end
 
-      instances[object_type] += 1
+      @instance_counts[generation][object_type] += 1
 
       Fiber.yield
     end
+
     self
   end
 
@@ -70,6 +78,34 @@ class Dumpster::Analyser
   end
 
   def generation_count
-    @stats.size
+    @instance_counts.size
+  end
+
+  # Find the the locations associated with the highest positive rate of change
+  # of object instances.
+  def locations_of_interst(count = 20)
+    locations = Set.new @location_counts.values.flat_map(&.keys)
+
+    gradient = {} of typeof(locations.first) => Float64
+
+    locations.each do |location|
+      # Get the number of new instantiations for each generation
+      instantiations = @location_counts.values.map { |gen| gen[location] }
+
+      # Map to the total active objects at each generation
+      counts = instantiations.reduce([] of UInt64) do |c, i|
+        c << i + c.last { 0 }
+      end
+
+      # TODO: find the slope of the linear regression - maybe LAPACK?
+
+      gradient[location] = 0.0
+    end
+
+    # gradient.sort_by(&.last).first(count)
+  end
+
+  def types_of_interest
+
   end
 end

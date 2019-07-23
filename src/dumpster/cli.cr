@@ -62,10 +62,15 @@ class Dumpster::Cli
 
       Terminimal.spinner await: analyser do
         percent_read = ((file.pos.to_f / file.size) * 100).to_i
-        "Analysing (#{percent_read}%)"
+        "Reading heap dump (#{percent_read}%)"
       end
+      heap = analyser.get
+      print_heap_info heap
 
-      print_heap_info analyser.get
+      locations = future { heap.locations_of_interst }
+      Terminimal.spinner await: locations, message: "Analysing locations"
+      locations.get
+      #print_table "Locations of interest", locations.get
     end
   end
 
@@ -74,5 +79,9 @@ class Dumpster::Cli
     Parsed #{heap.object_count} objects
     Across #{heap.generation_count} generations
     SUMMARY
+  end
+
+  private def print_table(title : String, rows : Array(NamedTuple(T))) forall T
+
   end
 end
