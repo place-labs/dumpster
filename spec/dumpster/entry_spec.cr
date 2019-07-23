@@ -36,4 +36,31 @@ describe Dumpster::Entry do
       entry.name.should eq("Foo::Bar::Example")
     end
   )
+
+  describe_entry_type(
+    type: Dumpster::Entry::Module,
+    line: "{\"address\":\"0x7fb477238dd0\", \"type\":\"MODULE\", \"class\":\"0x7fb4740dec08\", \"name\":\"Foo::Bar::Example\", \"references\":[\"0x7fb477238dd0\", \"0x7fb477239050\", \"0x7fb477238dd0\", \"0x7fb477238f10\", \"0x7fb477238da8\"], \"memsize\":904, \"flags\":{\"long_lived\":true, \"marked\":true}}",
+    test: ->(entry : Dumpster::Entry::Module) do
+      entry.address.should eq(0x7fb477238dd0)
+      entry.name.should eq("Foo::Bar::Example")
+    end
+  )
+
+  describe_entry_type(
+    type: Dumpster::Entry::Float,
+    line: "{\"address\":\"0x7fb475e2ab90\", \"type\":\"FLOAT\", \"class\":\"0x7fb4740d6440\", \"frozen\":true, \"value\":\"nan\", \"memsize\":40, \"flags\":{\"wb_protected\":true, \"old\":true, \"long_lived\":true, \"marked\":true}}",
+    test: ->(entry : Dumpster::Entry::Float) do
+      entry.address.should eq(0x7fb475e2ab90)
+    end
+  )
+
+  describe_entry_type(
+    type: Dumpster::Entry::String,
+    line: "{\"address\":\"0x7fb475e2b6f8\", \"type\":\"STRING\", \"class\":\"0x7fb4740dced0\", \"frozen\":true, \"embedded\":true, \"fstring\":true, \"bytesize\":13, \"value\":\"will_paginate\", \"encoding\":\"UTF-8\", \"memsize\":40, \"flags\":{\"wb_protected\":true, \"old\":true, \"long_lived\":true, \"marked\":true}}",
+    test: ->(entry : Dumpster::Entry::String) do
+      entry.address.should eq(0x7fb475e2b6f8)
+    end
+  )
+
+  # TODO: right tests for remaining types
 end
