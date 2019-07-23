@@ -21,15 +21,14 @@ class Dumpster::Analyser
         @object_count += 1
       when Dumpster::Entry::Class
         @classes[entry.address] = entry.name
-      else
-        raise "Unhandled entry type"
       end
+
       Fiber.yield
     end
     self
   end
 
-  # Gets the total number of objects contained in the heap dump.
+  # Gets the total number of objects parsed from the heap dump.
   getter object_count
 
   # Gets the total number of classes contained in the heap dump.
