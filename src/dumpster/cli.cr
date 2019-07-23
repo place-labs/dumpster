@@ -73,7 +73,6 @@ class Dumpster::Cli
     io.puts <<-SUMMARY
     Found #{heap.object_count} objects
     Built from #{heap.class_count} classes
-    Using #{heap.object_memsize >> 20}MiB of memory
     SUMMARY
   end
 end

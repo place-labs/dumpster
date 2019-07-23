@@ -11,7 +11,6 @@ class Dumpster::Analyser
   private def initialize(io)
     @heap = HeapReader.new io
     @object_count = 0
-    @object_memsize = 0
     @classes = {} of UInt64 => String? # Address => Name
   end
 
@@ -20,7 +19,6 @@ class Dumpster::Analyser
       case entry
       when Dumpster::Entry::Object
         @object_count += 1
-        @object_memsize += entry.memsize || 0
       when Dumpster::Entry::Class
         @classes[entry.address] = entry.name
       else
@@ -33,9 +31,6 @@ class Dumpster::Analyser
 
   # Gets the total number of objects contained in the heap dump.
   getter object_count
-
-  # Gets the total memory (bytes) used by all objects.
-  getter object_memsize
 
   # Gets the total number of classes contained in the heap dump.
   def class_count
