@@ -8,13 +8,13 @@ require "./entry"
 # efficient interface for iterating over these lazilly and emitting parsed
 # structs.
 class Dumpster::HeapReader
-  include Iterator(Dumpster::Entry::Types)
+  include Iterator(Dumpster::Entry::EntryStruct)
 
   # IO containing the raw heap dump
   private getter io : IO
 
   # BufferedChannel of parsed heap objects ready to be emitted.
-  private getter entries : Channel(Dumpster::Entry::Types)
+  private getter entries : Channel(Dumpster::Entry::EntryStruct)
 
   def initialize(@io, parsers = 16)
     lines = spawn_line_reader parsers * 2
@@ -59,7 +59,7 @@ class Dumpster::HeapReader
   # pool when available. Based on current information this **should** work with
   # no / minimal changes, but might need some love at a future date.
   private def spawn_parsers(input_channel, count)
-    output_channel = Channel(Entry::Types).new count
+    output_channel = Channel(Entry::EntryStruct).new count
 
     count.times do
       spawn do
@@ -68,7 +68,7 @@ class Dumpster::HeapReader
             input_channel
               .receive
               .try(&->Entry.parse(String))
-              .try(&->output_channel.send(Entry::Types))
+              .try(&->output_channel.send(Entry::EntryStruct))
           end
         rescue Channel::ClosedError
           # Nothing to do, one of the other fibers already finished the read.

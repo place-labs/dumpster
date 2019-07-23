@@ -1,10 +1,10 @@
 require "./common"
 
-struct Dumpster::Entry::Class
+struct Dumpster::Entry::File
   include Common
 
   JSON.mapping(
     address: {setter: false, type: UInt64, converter: Address},
-    name: {setter: false, type: ::String?}
+    fd: {setting: false, type: UInt16}
   )
 end

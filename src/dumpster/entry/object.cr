@@ -6,7 +6,7 @@ struct Dumpster::Entry::Object
   JSON.mapping(
     address: {setter: false, type: UInt64, converter: Address},
     class_address: {setter: false, type: UInt64, converter: Address, key: "class"},
-    file: {setter: false, type: String?},
+    file: {setter: false, type: ::String?},
     line: {setter: false, type: UInt32?},
     generation: {setter: false, type: UInt32?},
     memsize: {setter: false, type: UInt32?}

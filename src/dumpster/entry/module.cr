@@ -1,6 +1,6 @@
 require "./common"
 
-struct Dumpster::Entry::Class
+struct Dumpster::Entry::Module
   include Common
 
   JSON.mapping(
