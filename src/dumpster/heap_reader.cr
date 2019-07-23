@@ -16,7 +16,7 @@ class Dumpster::HeapReader
   # BufferedChannel of parsed heap objects ready to be emitted.
   private getter entries : Channel(Dumpster::Entry::Types)
 
-  def initialize(@io, parsers = 32)
+  def initialize(@io, parsers = 16)
     lines = spawn_line_reader parsers * 2
     @entries = spawn_parsers lines, parsers
   end
