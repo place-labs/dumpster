@@ -1,4 +1,5 @@
 require "./heap_reader"
+require "./num_tools"
 
 class Dumpster::Analyser
   private getter heap : HeapReader
@@ -93,9 +94,7 @@ class Dumpster::Analyser
       instantiations = @location_counts.values.map { |gen| gen[location] }
 
       # Map to the total active objects at each generation
-      counts = instantiations.reduce([] of UInt64) do |c, i|
-        c << i + c.last { 0 }
-      end
+      counts = instantiations.accumulate
 
       # TODO: find the slope of the linear regression - maybe LAPACK?
 
