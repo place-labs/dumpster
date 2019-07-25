@@ -102,24 +102,41 @@ class Dumpster::Analyser
 
   # Find the the locations associated with the highest positive rate of change
   # of object instances.
-  def locations_of_interst(count = 20)
-    locations = Set.new @location_counts.values.flat_map(&.keys)
+  #
+  # OPTIMIZE: add a low-pass filter (rolling avg or similar) prior to running
+  # the regression.
+  def locations_of_interst(top = 20, min_instances = 100, min_slope = 1e-3)
+    counters = @location_counts
 
-    gradient = {} of typeof(locations.first) => Float64
+    # Build a set of all known locations of object instantiation.
+    # NOTE: the rather obtuse syntax is intentional to enable lazy iteration
+    # while building the set.
+    locations = Set.new counters.each.flat_map(&.each.map { |(k, _)| k })
+
+    gradients = {} of typeof(locations.first) => Float64
 
     locations.each do |location|
       # Get the number of new instantiations for each generation
-      instantiations = @location_counts.values.map { |gen| gen[location] }
+      instantiations = counters.each.map &.count(location)
 
-      # Map to the total active objects at each generation
-      counts = instantiations.accumulate
+      # Map to the cumulative instance count at each generation
+      instances = instantiations.accumulate
 
-      # TODO: find the slope of the linear regression - maybe LAPACK?
+      # Filter items with low total instance count
+      next unless instances.last > min_instances
 
-      gradient[location] = 0.0
+      # Fit a linear regression to the cumulative instance count
+      _, gradient = NumTools.linreg(instances.map_with_index { |y, x| {x, y} })
+
+      # TODO: ignore items with a poor fit
+
+      gradients[location] = gradient
     end
 
-    # gradient.sort_by(&.last).first(count)
+    gradients.select { |_, gradient| gradient > min_slope }
+             .to_a
+             .sort_by { |_, gradient| -gradient }
+             .first(top)
   end
 
   def types_of_interest

@@ -1,3 +1,27 @@
+require "linalg"
+
+module Dumpster::NumTools
+  extend self
+
+  # Perform a univariate linear regression for a set of points and return a
+  # `Tuple` of the coefficients.
+  def linreg(points : Indexable({Number, Number}))
+    _X = LA::GMat.new(points.size, 2) do |i, j|
+      if j == 0
+        1
+      else
+        points[i][0]
+      end
+    end
+
+    y = LA::Mat.column(points.map &.[](1))
+
+    alpha, beta, _ = LA.solvels(_X, y).to_a
+
+    {alpha, beta}
+  end
+end
+
 # TODO: submit back to crystal stbdlib
 module Enumerable(T)
   # Returns as `Array` of cumulative values, starting from zero.

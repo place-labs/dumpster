@@ -1,5 +1,21 @@
 require "../spec_helper"
 
+describe Dumpster::NumTools do
+  describe ".linreg" do
+    it "correctly calculates coefficients" do
+      points = [{0, 1}, {1, 2}, {2, 3}, {3, 4}, {4, 5}]
+      alpha, beta = Dumpster::NumTools.linreg points
+      alpha.should be_close(1, 1e-5)
+      beta.should be_close(1, 1e-5)
+
+      points = [{0, 0}, {1, 1}, {2, 2}, {3, 3}, {4, 4}]
+      alpha, beta = Dumpster::NumTools.linreg points
+      alpha.should be_close(0, 1e-5)
+      beta.should be_close(1, 1e-5)
+    end
+  end
+end
+
 describe Enumerable do
   describe "#accumulate" do
     it { ([] of Int32).accumulate.should eq([] of Int32) }
