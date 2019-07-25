@@ -1,5 +1,6 @@
 require "./heap_reader"
 require "./num_tools"
+require "./counter"
 
 class Dumpster::Analyser
   private getter heap : HeapReader
@@ -9,15 +10,13 @@ class Dumpster::Analyser
     new(io).parse
   end
 
-  # {type, location} => count
-  alias LocationCounter = Hash({::String, ::String}, UInt64)
+  # Keyed on {type, location}
+  alias LocationCounter = Counter({::String, ::String})
 
-  # type => count
-  alias InstanceCounter = Hash(::String, UInt64)
+  # Keyed on type
+  alias InstanceCounter = Counter(::String)
 
   alias Generation = UInt32
-
-  alias GenerationStats = Hash(Generation, {LocationCounter, InstanceCounter})
 
   private def initialize(io)
     @heap = HeapReader.new io
@@ -27,24 +26,40 @@ class Dumpster::Analyser
     # Address => Name
     @classes = {} of UInt64 => String?
 
-    # Autoviv stats counters
-    @location_counts = Hash(Generation, LocationCounter).new do |h, gen|
-      h[gen] = LocationCounter.new { |h, k| h[k] = 0 }
-    end
-    @instance_counts = Hash(Generation, InstanceCounter).new do |h, gen|
-      h[gen] = InstanceCounter.new { |h, k| h[k] = 0 }
+    # Stats counters for tracking points of interest across each GC generation
+    @location_counts = [] of LocationCounter
+    @instance_counts = [] of InstanceCounter
+  end
+
+  # Creates a `Hash` that will autopopulate elements with zero type, or new
+  # instance of the appropropriate value type when first accessed.
+  macro autoviv_hash(key_type, value_type)
+    Hash({{key_type}}, {{value_type}}).new do |h, k|
+      {% if value_type.resolve.class.has_method?(:zero) %}
+        h[k] = {{value_type}}.zero
+      {% else %}
+        h[k] = {{value_type}}.new
+      {% end %}
     end
   end
 
+  # Perform a single pass across the dump file and count points of interest
+  # across generations.
   protected def parse
+    location_counts = autoviv_hash(Generation, LocationCounter)
+    instance_counts = autoviv_hash(Generation, InstanceCounter)
+
     heap.each do |entry|
       @object_count += 1
 
-      generation = entry.generation || 0_u32
+      generation = entry.generation || Generation.zero
       object_type = entry.type
 
       case entry
       when Dumpster::Entry::Object
+        # FIXME: object names may not be resolved at this point, may need to
+        # initially store with address, then perform name resolution as a
+        # second pass.
         class_name = @classes[entry.class_address]?
         object_type = class_name unless class_name.nil?
       when Dumpster::Entry::Class
@@ -53,18 +68,21 @@ class Dumpster::Analyser
 
       # Associate entries by generation and form counts of the points of
       # instantiation (locations) and instance types created (instances).
-
       if entry.responds_to?(:location)
         location = entry.location
         unless location.nil?
-          @location_counts[generation][{object_type, location}] += 1
+          location_counts[generation].increment({object_type, location})
         end
       end
 
-      @instance_counts[generation][object_type] += 1
+      instance_counts[generation].increment object_type
 
       Fiber.yield
     end
+
+    # Extract generation based counters and discard absolute generation numbers
+    @location_counts = location_counts.values
+    @instance_counts = instance_counts.values
 
     self
   end
