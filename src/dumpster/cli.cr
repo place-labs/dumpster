@@ -67,9 +67,16 @@ class Dumpster::Cli
       heap = analyser.get
       print_heap_info heap
 
+      puts
+
       locations = future { heap.locations_of_interst }
       Terminimal.spinner await: locations, message: "Analysing locations"
-      locations.get
+
+      puts "► Locations of interest"
+      locations.get.each do |(name, location), growth|
+        puts "#{sprintf "% 10.2f", growth}  #{location} (#{name})"
+      end
+
       #print_table "Locations of interest", locations.get
     end
   end

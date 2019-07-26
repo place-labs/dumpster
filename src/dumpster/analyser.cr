@@ -105,7 +105,7 @@ class Dumpster::Analyser
   #
   # OPTIMIZE: add a low-pass filter (rolling avg or similar) prior to running
   # the regression.
-  def locations_of_interst(top = 20, min_instances = 100, min_slope = 1e-3)
+  def locations_of_interst(top = 100, min_instances = 100, min_slope = 1e-3)
     counters = @location_counts
 
     # Build a set of all known locations of object instantiation.
