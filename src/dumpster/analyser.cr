@@ -131,6 +131,8 @@ class Dumpster::Analyser
       # TODO: ignore items with a poor fit
 
       gradients[location] = gradient
+
+      Fiber.yield
     end
 
     gradients.select { |_, gradient| gradient > min_slope }
