@@ -20,7 +20,10 @@ describe Dumpster::NumTools do
       a = [1, 2, -2, 4, 2, 3, 1, 0]
       b = [2, 3, -2, 3, 2, 4, 1, -1]
       c = [-2, 0, 4, 0, 1, 1, 0, -2]
+      a_inv = a.map { |x| -1 * x }
 
+      Dumpster::NumTools.correlate(a, a).should eq(1)
+      Dumpster::NumTools.correlate(a, a_inv).should eq(-1)
       Dumpster::NumTools.correlate(a, b).should be_close(0.947, 1e-3)
       Dumpster::NumTools.correlate(a, c).should be_close(-0.157, 1e-3)
     end
