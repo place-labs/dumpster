@@ -4,17 +4,19 @@
 # where it make sense to swap this out for a count-min-sketch, but a Hash is
 # simple for now...
 class Dumpster::Counter(T)
+  alias Count = UInt32
+
   def initialize
-    @counts = Hash(T, UInt32).new { |h, k| h[k] = 0_u32 }
+    @hash = {} of T => Count
   end
 
-  def increment(key : T)
-    @counts[key] += 1
+  def increment(key : T) : Count
+    @hash[key] = count(key) + 1
   end
 
-  def count(key : T)
-    @counts[key]
+  def count(key : T) : Count
+    @hash[key]? || Count.zero
   end
 
-  delegate each, to: @counts
+  delegate each, to: @hash
 end
