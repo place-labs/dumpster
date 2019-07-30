@@ -14,6 +14,17 @@ describe Dumpster::NumTools do
       beta.should be_close(1, 1e-5)
     end
   end
+
+  describe ".correlate" do
+    it "calculates normalised cross-correlation" do
+      a = [1, 2, -2, 4, 2, 3, 1, 0]
+      b = [2, 3, -2, 3, 2, 4, 1, -1]
+      c = [-2, 0, 4, 0, 1, 1, 0, -2]
+
+      Dumpster::NumTools.correlate(a, b).should be_close(0.947, 1e-3)
+      Dumpster::NumTools.correlate(a, c).should be_close(-0.157, 1e-3)
+    end
+  end
 end
 
 describe Enumerable do

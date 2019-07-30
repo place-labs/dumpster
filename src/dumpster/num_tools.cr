@@ -1,3 +1,4 @@
+require "math"
 require "linalg"
 
 module Dumpster::NumTools
@@ -18,6 +19,17 @@ module Dumpster::NumTools
     b0, b1, _ = LA.solvels(a, b).to_a
 
     {b0, b1}
+  end
+
+  # Given two series, provide their normalised cross-correlation.
+  def correlate(a : Enumerable(Number), b : Enumerable(Number))
+    raise ArgumentError.new("series must be of the same size") if a.size != b.size
+
+    sum_of_products = a.zip(b).sum { |x, y| x * y }
+
+    sum_of_squares = a.sum { |x| x * x } * b.sum { |y| y * y }
+
+    sum_of_products / Math.sqrt(sum_of_squares)
   end
 end
 
