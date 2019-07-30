@@ -102,10 +102,7 @@ class Dumpster::Analyser
 
   # Find the the locations associated with the highest positive rate of change
   # of object instances.
-  #
-  # OPTIMIZE: add a low-pass filter (rolling avg or similar) prior to running
-  # the regression.
-  def locations_of_interst(top = 100, min_instances = 100, min_slope = 1e-3)
+  def locations_of_interst(limit = 100, min_instances = 100, min_slope = 1e-3)
     counters = @location_counts
 
     # Build a set of all known locations of object instantiation.
@@ -113,35 +110,37 @@ class Dumpster::Analyser
     # while building the set.
     locations = Set.new counters.each.flat_map(&.each.map { |(k, _)| k })
 
-    gradients = {} of typeof(locations.first) => Float64
+    top = Array({typeof(locations.first), Float64}).new(limit + 1)
 
     locations.each do |location|
-      # Get the number of new instantiations for each generation
-      instantiations = counters.each.map &.count(location)
-
-      # Map to the cumulative instance count at each generation
-      instances = instantiations.accumulate
+      # Build a series with cumulative instance counts at each GC generation.
+      instances = counters.each.map(&.count location).accumulate
 
       # Filter items with low total instance count
       next unless instances.last > min_instances
+
+      # OPTIMIZE: add a low-pass filter (rolling avg or similar)
 
       # Fit a linear regression to the cumulative instance count
       _, gradient = NumTools.linreg(instances.map_with_index { |y, x| {x, y} })
 
       # TODO: ignore items with a poor fit
 
-      gradients[location] = gradient
+      idx = top.bsearch_index { |(_, v), _| gradient >= v }
+      entry = {location, gradient}
+      if idx.nil?
+        top.push entry
+      else
+        top.insert idx, entry
+      end
+      top.pop if top.size > limit
 
       Fiber.yield
     end
 
-    gradients.select { |_, gradient| gradient > min_slope }
-             .to_a
-             .sort_by { |_, gradient| -gradient }
-             .first(top)
+    top
   end
 
   def types_of_interest
-
   end
 end
