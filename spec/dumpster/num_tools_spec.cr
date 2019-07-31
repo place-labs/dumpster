@@ -54,4 +54,18 @@ describe Enumerable do
       typeof([1.5, 2.5, 3.5].accumulate).should eq(Array(Float64))
     end
   end
+
+  describe "#dot" do
+    it { [1, 3, -5].dot([4, -2, -1]).should eq(3) }
+    it { [0].dot([0]).should eq(0) }
+
+    it "raises an error when sizes are not uniform" do
+      expect_raises(ArgumentError) { [0].dot [1, 2] }
+    end
+
+    it "raises an error when empty" do
+      empty = [] of Int32
+      expect_raises(ArgumentError) { empty.dot empty }
+    end
+  end
 end
