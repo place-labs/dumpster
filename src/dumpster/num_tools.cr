@@ -36,20 +36,20 @@ module Dumpster::NumTools
     squares = series.map { |x| x.dot x }
 
     # Correlation of each series with itself will always be 1
-    correlations = LA::GMat.identity(series.size)
+    m = LA::GMat.identity(series.size)
 
     # Fill in the blanks for each other pairwise combination
     series.each.with_index do |a, i|
       (i + 1..series.size - 1).each do |j|
         b = series[j]
         correlation = a.dot(b) / Math.sqrt(squares[i] * squares[j])
-        correlations[i, j] = correlations[j, i] = correlation
+        m[i, j] = m[j, i] = correlation
       end
     end
 
-    correlations.assume! LA::MatrixFlags::Symmetric
+    m.assume! LA::MatrixFlags::Symmetric
 
-    correlations
+    m
   end
 
   private def check_uniform_size!(*x : Enumerable)
