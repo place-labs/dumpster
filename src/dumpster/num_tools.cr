@@ -4,8 +4,7 @@ require "linalg"
 module Dumpster::NumTools
   extend self
 
-  # Perform a univariate linear regression for a set of points and return a
-  # `Tuple` of the coefficients.
+  # Perform a univariate linear regression for a set of points.
   def linreg(points : Enumerable({Number, Number}))
     a = LA::GMat.new(points.size, 2)
     b = LA::GMat.new(points.size, 1)
@@ -16,9 +15,15 @@ module Dumpster::NumTools
       b[i, 0] = y
     end
 
-    b0, b1, _ = LA.solvels(a, b).to_a
+    b0, b1, r, p, e = LA.solvels(a, b).to_a
 
-    {b0, b1}
+    {
+      intercept: b0,
+      slope: b1,
+      r_value: r,
+      p_value: p,
+      stderr: e
+    }
   end
 
   # Given two series, provide their normalised cross-correlation.

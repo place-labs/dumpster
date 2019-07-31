@@ -4,14 +4,16 @@ describe Dumpster::NumTools do
   describe ".linreg" do
     it "correctly calculates coefficients" do
       points = [{0, 1}, {1, 2}, {2, 3}, {3, 4}, {4, 5}]
-      alpha, beta = Dumpster::NumTools.linreg points
-      alpha.should be_close(1, 1e-5)
-      beta.should be_close(1, 1e-5)
+      regression = Dumpster::NumTools.linreg points
+      regression[:intercept].should be_close(1, 1e-5)
+      regression[:slope].should be_close(1, 1e-5)
+      regression[:stderr].should be_close(0, 1e-10)
 
       points = [{0, 0}, {1, 1}, {2, 2}, {3, 3}, {4, 4}]
-      alpha, beta = Dumpster::NumTools.linreg points
-      alpha.should be_close(0, 1e-5)
-      beta.should be_close(1, 1e-5)
+      regression = Dumpster::NumTools.linreg points
+      regression[:intercept].should be_close(0, 1e-5)
+      regression[:slope].should be_close(1, 1e-5)
+      regression[:stderr].should be_close(0, 1e-10)
     end
   end
 
