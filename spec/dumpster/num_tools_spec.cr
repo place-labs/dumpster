@@ -16,16 +16,25 @@ describe Dumpster::NumTools do
   end
 
   describe ".correlate" do
-    it "calculates normalised cross-correlation" do
-      a = [1, 2, -2, 4, 2, 3, 1, 0]
-      b = [2, 3, -2, 3, 2, 4, 1, -1]
-      c = [-2, 0, 4, 0, 1, 1, 0, -2]
-      a_inv = a.map { |x| -1 * x }
+    a = [1, 2, -2, 4, 2, 3, 1, 0]
+    b = [2, 3, -2, 3, 2, 4, 1, -1]
+    c = [-2, 0, 4, 0, 1, 1, 0, -2]
+    d = a.map { |x| -1 * x }
 
+    it "calculates normalised cross-correlation of two series" do
       Dumpster::NumTools.correlate(a, a).should eq(1)
-      Dumpster::NumTools.correlate(a, a_inv).should eq(-1)
+      Dumpster::NumTools.correlate(a, d).should eq(-1)
       Dumpster::NumTools.correlate(a, b).should be_close(0.947, 1e-3)
       Dumpster::NumTools.correlate(a, c).should be_close(-0.157, 1e-3)
+    end
+
+    it "produces a cross-correlation matrix for a list of series" do
+      correlations = Dumpster::NumTools.correlate [a, b, c, d]
+
+      correlations[0, 0].should eq(1)
+      correlations[0, 1].should be_close(0.947, 1e-3)
+      correlations[0, 2].should be_close(-0.157, 1e-3)
+      correlations[0, 3].should eq(-1)
     end
   end
 end

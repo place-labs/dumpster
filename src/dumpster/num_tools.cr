@@ -23,13 +23,49 @@ module Dumpster::NumTools
 
   # Given two series, provide their normalised cross-correlation.
   def correlate(a : Enumerable(Number), b : Enumerable(Number))
-    raise ArgumentError.new("series must be of the same size") if a.size != b.size
+    check_uniform_size! a, b
+    dotprod(a, b) / Math.sqrt(dotprod(a, a) * dotprod(b, b))
+  end
 
-    sum_of_products = a.zip(b).sum { |x, y| x * y }
+  # Given a list of series, provide a correlation matrix for each pair within.
+  def correlate(series : Indexable(Enumerable(Number)))
+    check_uniform_size! series
 
-    sum_of_squares = a.sum { |x| x * x } * b.sum { |y| y * y }
+    # Pre-compute the sum of squares for each series as it's reused in the
+    # correlation function.
+    squares = series.map { |x| dotprod x, x }
 
-    sum_of_products / Math.sqrt(sum_of_squares)
+    # Correlation of each series with itself will always be 1
+    correlations = LA::GMat.identity(series.size)
+
+    # Fill in the blanks for each other pairwise combination
+    series.each.with_index do |a, i|
+      (i + 1..series.size - 1).each do |j|
+        b = series[j]
+        correlation = dotprod(a, b) / Math.sqrt(squares[i] * squares[j])
+        correlations[i, j] = correlations[j, i] = correlation
+      end
+    end
+
+    correlations.assume! LA::MatrixFlags::Symmetric
+
+    correlations
+  end
+
+  # Given two equal-length `Enumerables`, compute their dot product.
+  def dotprod(a : Enumerable(Number), b : Enumerable(Number))
+    check_uniform_size! a, b
+    a.zip(b).sum &.product
+  end
+
+  private def check_uniform_size!(*x : Enumerable)
+    check_uniform_size! x
+  end
+
+  private def check_uniform_size!(x : Enumerable(Enumerable))
+    if x.any? { |a| a.size != x.first.size }
+      raise ArgumentError.new("series must be of the same size")
+    end
   end
 end
 
