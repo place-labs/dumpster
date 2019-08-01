@@ -8,7 +8,8 @@ module Dumpster::Entry
   extend self
 
   # Character offset for the start of the "type" field (for non-root entries).
-  VT_START_POS = 37
+  # FIXME: this offset appears to differ on different machines / arch
+  VT_START_POS = 32 # 37
 
   # Union of parseable entry types.
   alias EntryStruct = Entry::Object |
