@@ -16,15 +16,9 @@ module Dumpster::NumTools
       b[i, 0] = y
     end
 
-    b0, b1, r, p, e = LA.solvels(a, b).to_a
+    b0, b1, _ = LA.solvels(a, b).to_a
 
-    {
-      intercept: b0,
-      slope: b1,
-      r_value: r,
-      p_value: p,
-      stderr: e
-    }
+    {b0, b1}
   end
 
   # Given two series, provide their normalised cross-correlation.
