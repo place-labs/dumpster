@@ -8,7 +8,7 @@ targets:
   dumpster:
     main: src/dumpster.cr
 
-crystal: 0.27.2
+crystal: 0.29.0
 
 license: MIT
 
@@ -17,3 +17,5 @@ dependencies:
     github: aca-labs/terminimal
   linalg:
     github: konovod/linalg
+  numcry:
+    github: aca-labs/numcry

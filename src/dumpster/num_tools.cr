@@ -1,6 +1,6 @@
 require "math"
 require "linalg"
-require "../lib/math"
+require "numcry"
 
 module Dumpster::NumTools
   extend self
@@ -21,19 +21,11 @@ module Dumpster::NumTools
     {b0, b1}
   end
 
-  # Given two series, provide their normalised cross-correlation.
-  def correlate(a : Enumerable(Number), b : Enumerable(Number))
-    check_uniform_size! a, b
-    a.dot(b) / Math.sqrt(a.dot(a) * b.dot(b))
-  end
-
   # Given a list of series, provide a correlation matrix for each pair within.
   def correlate(series : Indexable(Enumerable(Number)))
-    check_uniform_size! series
-
-    # Pre-compute the sum of squares for each series as it's reused in the
-    # correlation function.
-    squares = series.map { |x| x.dot x }
+    if series.any? { |a| a.size != series.first.size }
+      raise ArgumentError.new("series must be of the same size")
+    end
 
     # Correlation of each series with itself will always be 1
     m = LA::GMat.identity(series.size)
@@ -42,32 +34,12 @@ module Dumpster::NumTools
     series.each.with_index do |a, i|
       (i + 1..series.size - 1).each do |j|
         b = series[j]
-        correlation = a.dot(b) / Math.sqrt(squares[i] * squares[j])
-        m[i, j] = m[j, i] = correlation
+        m[i, j] = m[j, i] = a.corrcoef b
       end
     end
 
     m.assume! LA::MatrixFlags::Symmetric
 
     m
-  end
-
-  private def check_uniform_size!(*x : Enumerable)
-    check_uniform_size! x
-  end
-
-  private def check_uniform_size!(x : Enumerable(Enumerable))
-    if x.any? { |a| a.size != x.first.size }
-      raise ArgumentError.new("series must be of the same size")
-    end
-  end
-end
-
-module Enumerable(T)
-  # Compute the dot product of `self` and *other*.
-  def dot(other : Enumerable)
-    raise ArgumentError.new("sizes must be uniform") if size != other.size
-    raise ArgumentError.new("size must be > 0") unless size > 0
-    zip(other).sum &.product
   end
 end
