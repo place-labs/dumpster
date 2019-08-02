@@ -4,7 +4,7 @@ require "math"
 # functions for numeric collections.
 module Math::Stats
   def mean
-    sum.to_f / size.to_f
+    sum / size.to_f
   end
 
   def variance
