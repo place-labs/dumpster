@@ -110,35 +110,46 @@ class Dumpster::Analyser
     # while building the set.
     locations = Set.new counters.each.flat_map(&.each.map { |(k, _)| k })
 
-    top = Array({typeof(locations.first), Float64}).new(limit + 1)
+    # List of locations of potential interest
+    growing = [] of {
+      location: typeof(locations.first),
+      gradient: Float64,
+      instance: Array(UInt32)
+    }
 
     locations.each do |location|
+
       # Build a series with cumulative instance counts at each GC generation.
-      instances = counters.each.map(&.count location).accumulate
+      instance = counters.each.map(&.count location).cumsum
 
-      # Filter items with low total instance count
-      next unless instances.last > min_instances
-
-      # OPTIMIZE: add a low-pass filter (rolling avg or similar)
+      # Ignore items with low total instance count
+      next unless instance.last > min_instances
 
       # Fit a linear regression to the cumulative instance count
-      _, gradient = NumTools.linreg(instances.map_with_index { |y, x| {x, y} })
+      _, gradient = NumTools.linreg(instance.map_with_index { |y, x| {x, y} })
+
+      next if gradient < min_slope
 
       # TODO: ignore items with a poor fit
 
-      idx = top.bsearch_index { |(_, v), _| gradient >= v }
-      entry = {location, gradient}
-      if idx.nil?
-        top.push entry
-      else
-        top.insert idx, entry
-      end
-      top.pop if top.size > limit
+      growing << {
+        location: location,
+        gradient: gradient,
+        instance: instance
+      }
 
       Fiber.yield
     end
 
-    top
+    # TODO: calculate pearson correlation and filter for strong positive (> 0.5)
+
+    correlations = NumTools.correlate growing.map { |x| x[:instance] }
+
+    puts
+    puts growing.map { |x| x[:location] }.join "\n"
+    puts correlations
+
+    [] of {::String, ::String}
   end
 
   def types_of_interest
