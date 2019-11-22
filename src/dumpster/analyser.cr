@@ -127,7 +127,6 @@ class Dumpster::Analyser
       next if gradient < min_slope
 
       # TODO: ignore items with a poor fit
-
       growing << {
         location: location,
         gradient: gradient,
@@ -137,19 +136,12 @@ class Dumpster::Analyser
       Fiber.yield
     end
 
-    # TODO: calculate pearson correlation and filter for strong positive (> 0.5)
-
-    correlations = NumTools.correlate growing.map { |x| x[:instance] }
-
-    # FIXME: Supremely inefficient transformations, optimise at will.
-    zips = growing.map(&.[:location]).zip(correlations.to_aa)
-    values = zips.select do |l, correlation|
-      correlation.any? { |c| c > 0.5 }
+    correlations = NumTools.correlate(growing.map { |x| x[:instance] }).to_aa
+    areas_of_interest = growing.map_with_index do |item, idx|
+      {item[:location], item[:gradient]} if correlations[idx].any? { |c| c > 0.5 }
     end
 
-    values.map_with_index do |(v, c), idx|
-      {v, growing[idx][:gradient]}
-    end.sort_by!(&.last)
+    areas_of_interest.compact.sort_by!(&.last)
   end
 
   def types_of_interest

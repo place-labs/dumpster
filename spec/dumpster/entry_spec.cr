@@ -1,6 +1,6 @@
 require "../spec_helper"
 
-macro describe_entry_type(type, line, test = ->(x) {})
+macro describe_entry_type(type, line, test = ->(_x) {})
   describe {{type}} do
     it "identifies the line type" do
       Dumpster::Entry.type_of({{line}}).should eq({{type}})

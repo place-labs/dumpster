@@ -6,7 +6,7 @@ shards:
 
   numcry:
     github: aca-labs/numcry
-    version: 1.0.0
+    commit: 338758a71f7b15a726a063d8ce1bf443719cbe3c
 
   terminimal:
     github: aca-labs/terminimal
