@@ -102,7 +102,7 @@ class Dumpster::Analyser
 
   # Find the the locations associated with the highest positive rate of change
   # of object instances.
-  def locations_of_interst(limit = 100, min_instances = 100, min_slope = 1e-3)
+  def locations_of_interest(limit = 100, min_instances = 100, min_slope = 1e-3)
     counters = @location_counts
 
     # Build a set of all known locations of object instantiation.
@@ -137,11 +137,11 @@ class Dumpster::Analyser
     end
 
     correlations = NumTools.correlate(growing.map { |x| x[:instance] }).to_aa
-    areas_of_interest = growing.map_with_index do |item, idx|
+    highlights = growing.map_with_index do |item, idx|
       {item[:location], item[:gradient]} if correlations[idx].any? { |c| c > 0.5 }
     end
 
-    areas_of_interest.compact.sort_by!(&.last)
+    highlights.compact.sort_by!(&.last)
   end
 
   def types_of_interest

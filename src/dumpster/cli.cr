@@ -69,7 +69,7 @@ class Dumpster::Cli
 
       puts
 
-      locations = future { heap.locations_of_interst }
+      locations = future { heap.locations_of_interest }
       Terminimal.spinner await: locations, message: "Analysing locations"
 
       puts "► Locations of interest"
