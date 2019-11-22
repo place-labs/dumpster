@@ -9,6 +9,7 @@ module Dumpster::Entry
 
   # Character offset for the start of the "type" field (for non-root entries).
   # FIXME: this offset appears to differ on different machines / arch
+
   VT_START_POS = 32 # 37
 
   # Union of parseable entry types.
@@ -36,7 +37,9 @@ module Dumpster::Entry
   # Infer the type of a line based on it's raw String form.
   def type_of(line : ::String)
     {% begin %}
-      case line[VT_START_POS, 4]
+      type_key = %("type":")
+      index = line.index(type_key).as(Int32) + type_key.size
+      case line[index...index+4]
       {% for t in EntryStruct.union_types %}
       when {{ t.name.split("::").last.upcase[0...4] }} then {{ t.id }}
       {% end %}

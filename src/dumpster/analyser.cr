@@ -111,16 +111,12 @@ class Dumpster::Analyser
     locations = Set.new counters.each.flat_map(&.each.map { |(k, _)| k })
 
     # List of locations of potential interest
-    growing = [] of {
-      location: typeof(locations.first),
-      gradient: Float64,
-      instance: Array(UInt32)
-    }
+    growing = [] of {location: typeof(locations.first), gradient: Float64, instance: Array(UInt32)}
 
     locations.each do |location|
-
       # Build a series with cumulative instance counts at each GC generation.
-      instance = counters.each.map(&.count location).cumsum
+      counts = counters.map(&.count location)
+      instance = counts.cumsum
 
       # Ignore items with low total instance count
       next unless instance.last > min_instances
@@ -135,7 +131,7 @@ class Dumpster::Analyser
       growing << {
         location: location,
         gradient: gradient,
-        instance: instance
+        instance: instance,
       }
 
       Fiber.yield
@@ -145,11 +141,15 @@ class Dumpster::Analyser
 
     correlations = NumTools.correlate growing.map { |x| x[:instance] }
 
-    puts
-    puts growing.map { |x| x[:location] }.join "\n"
-    puts correlations
+    # FIXME: Supremely inefficient transformations, optimise at will.
+    zips = growing.map(&.[:location]).zip(correlations.to_aa)
+    values = zips.select do |l, correlation|
+      correlation.any? { |c| c > 0.5 }
+    end
 
-    [] of {::String, ::String}
+    values.map_with_index do |(v, c), idx|
+      {v, growing[idx][:gradient]}
+    end.sort_by!(&.last)
   end
 
   def types_of_interest

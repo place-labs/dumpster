@@ -1,4 +1,4 @@
-FROM crystallang/crystal
+FROM crystallang/crystal:0.29.0
 
 WORKDIR /app
 

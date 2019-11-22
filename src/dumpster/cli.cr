@@ -77,7 +77,7 @@ class Dumpster::Cli
         puts "#{sprintf "% 10.2f", growth}  #{location} (#{name})"
       end
 
-      #print_table "Locations of interest", locations.get
+      # print_table "Locations of interest", locations.get
     end
   end
 
@@ -89,6 +89,5 @@ class Dumpster::Cli
   end
 
   private def print_table(title : String, rows : Array(NamedTuple(T))) forall T
-
   end
 end

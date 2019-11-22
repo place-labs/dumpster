@@ -19,3 +19,4 @@ dependencies:
     github: konovod/linalg
   numcry:
     github: aca-labs/numcry
+    branch: master

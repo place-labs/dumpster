@@ -4,3 +4,4 @@
 /.shards/
 /dumpster
 !/dumpster/*
+*.swp

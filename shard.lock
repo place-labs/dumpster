@@ -1,0 +1,14 @@
+version: 1.0
+shards:
+  linalg:
+    github: konovod/linalg
+    commit: 99feef75c121b0a1dd16463919908f08f6e81ad9
+
+  numcry:
+    github: aca-labs/numcry
+    version: 1.0.0
+
+  terminimal:
+    github: aca-labs/terminimal
+    version: 1.1.0
+
