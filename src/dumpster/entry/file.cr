@@ -5,6 +5,6 @@ struct Dumpster::Entry::File
 
   JSON.mapping(
     address: {setter: false, type: UInt64, converter: Address},
-    fd: {setting: false, type: UInt16}
+    fd: {setting: false, type: UInt16?}
   )
 end
