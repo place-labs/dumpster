@@ -127,21 +127,38 @@ class Dumpster::Analyser
       next if gradient < min_slope
 
       # TODO: ignore items with a poor fit
-      growing << {
-        location: location,
-        gradient: gradient,
-        instance: instance,
-      }
+
+      growing << {location: location, gradient: gradient, instance: instance}
 
       Fiber.yield
     end
 
-    correlations = NumTools.correlate(growing.map { |x| x[:instance] }).to_aa
+    # Compute the correlation matrix for instance counts over time
+    correlations = NumTools.correlate(growing.map { |x| x[:instance] })
+
+    # Filter strongly correlated locations such that within each set of these
+    # only the location with the slowest growth rate is highlighted. In general
+    # every object will instantiate zero or more child objects. Searching for
+    # this base object within each correlated set should indicate the root of a
+    # mem leak.
+    # FIXME: the is an abomination (albeit functional) - tidy up when not tired
     highlights = growing.map_with_index do |item, idx|
-      {item[:location], item[:gradient]} if correlations[idx].any? { |c| c > 0.5 }
+      min_gradient = item[:gradient]
+      root = idx
+      correlations.ncolumns.times do |other_idx|
+        next if idx == other_idx
+        next if correlations[idx, other_idx] < 0.5
+        gradient = growing[other_idx][:gradient]
+        if gradient < min_gradient
+          root = other_idx
+          min_gradient = gradient
+        end
+      end
+      next unless root == idx
+      {item[:location], item[:gradient]}
     end
 
-    highlights.compact.sort_by!(&.last)
+    highlights.compact.sort_by!(&.last).reverse!
   end
 
   def types_of_interest
