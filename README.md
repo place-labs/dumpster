@@ -1,18 +1,42 @@
 # Dumpster
+An analysis tool for Ruby MRI heap dumps.
 
-TODO: Write a description here
-
-## Installation
-
-TODO: Write installation instructions here
+Provides automated analysis and identification of potential memory leaks within
+a program.
 
 ## Usage
 
-TODO: Write usage instructions here
+### Capturing Heap Dumps
+Using [rbtrace](https://github.com/tmm1/rbtrace), enable allocation tracking on
+the ruby process you'd like to inspect.
+_Note:_ this will result in a perf impact while active. Use with care.
+```
+rbtrace -p <pid> -e 'Thread.new{require "objspace";ObjectSpace.trace_object_allocations_start}.join'
+```
 
-## Development
+After the process has had time to rotate through a few GC generations, export
+via:
+```
+rbtrace -p <pid> -e 'Thread.new{require "objspace";io=File.open("/tmp/ruby-heap.dump", "w");ObjectSpace.dump_all(output: io);io.close}.join'
+```
 
-TODO: Write development instructions here
+To stop tracking and clear allocations from mem:
+```
+rbtrace -p <pid> -e 'Thread.new{GC.start;require "objspace";ObjectSpace.trace_object_allocations_stop;ObjectSpace.trace_object_allocations_clear}.join'
+```
+
+### Analysis
+!! When using outside of a dev context, analysis should always take place on a
+machine remote to that running the application under analysis.
+
+```
+./dumpster ruby-heap.dump
+```
+
+Depending on the size of heap dump being parsed, analysis may take some time.
+Progress will be provided. When complete, a ordered list of 'locations of
+interest' will be provided. These are lines responsible for an increasing number
+of long-lived object allocations that may be indicative of a memory leak.
 
 ## Contributing
 
@@ -24,4 +48,4 @@ TODO: Write development instructions here
 
 ## Contributors
 
-- [[your-github-name]](https://github.com/[your-github-name]) Kim Burgess - creator, maintainer
+- [Kim Burgess](https://github.com/kimburgess) Kim Burgess - creator, maintainer
