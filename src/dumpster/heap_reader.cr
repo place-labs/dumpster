@@ -23,7 +23,7 @@ class Dumpster::HeapReader
 
   # See `Iterator#next`
   def next
-    if entries.closed? && entries.empty?
+    if entries.closed?
       stop
     else
       entries.receive
