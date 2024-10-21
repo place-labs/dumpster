@@ -1,18 +1,26 @@
 version: 2.0
 shards:
+  future:
+    git: https://github.com/crystal-community/future.cr.git
+    version: 1.0.0
+
   json_mapping:
     git: https://github.com/crystal-lang/json_mapping.cr.git
     version: 0.1.1
 
   linalg:
     git: https://github.com/konovod/linalg.git
-    version: 0.2.0+git.commit.99feef75c121b0a1dd16463919908f08f6e81ad9
+    version: 0.3.0
 
   numcry:
     git: https://github.com/aca-labs/numcry.git
     version: 1.0.0+git.commit.338758a71f7b15a726a063d8ce1bf443719cbe3c
 
+  simplepool:
+    git: https://github.com/konovod/simplepool.git
+    version: 0.1.0+git.commit.e3ebfed4384cea18fa0e6bc9359f17314cacaee6
+
   terminimal:
     git: https://github.com/aca-labs/terminimal.git
-    version: 1.1.0
+    version: 1.2.0+git.commit.7a45ba2c7972eaaa162bb4350f3ae7d24fd7de52
 

@@ -13,6 +13,7 @@ license: MIT
 dependencies:
   terminimal:
     github: aca-labs/terminimal
+    branch: feat/crystal1.x
   linalg:
     github: konovod/linalg
   numcry:
@@ -20,3 +21,5 @@ dependencies:
     branch: master
   json_mapping:
     github: crystal-lang/json_mapping.cr
+  future:
+    github: crystal-community/future.cr
