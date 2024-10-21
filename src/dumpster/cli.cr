@@ -3,6 +3,7 @@ require "./analyser"
 require "terminimal"
 require "option_parser"
 require "errno"
+require "future"
 
 class Dumpster::Cli
   VERSION = "dumpster #{Dumpster::VERSION}"
