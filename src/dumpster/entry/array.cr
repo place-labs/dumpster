@@ -1,4 +1,5 @@
 require "./common"
+require "json_mapping"
 
 struct Dumpster::Entry::Array
   include Common

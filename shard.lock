@@ -1,14 +1,18 @@
-version: 1.0
+version: 2.0
 shards:
+  json_mapping:
+    git: https://github.com/crystal-lang/json_mapping.cr.git
+    version: 0.1.1
+
   linalg:
-    github: konovod/linalg
-    commit: 99feef75c121b0a1dd16463919908f08f6e81ad9
+    git: https://github.com/konovod/linalg.git
+    version: 0.2.0+git.commit.99feef75c121b0a1dd16463919908f08f6e81ad9
 
   numcry:
-    github: aca-labs/numcry
-    commit: 338758a71f7b15a726a063d8ce1bf443719cbe3c
+    git: https://github.com/aca-labs/numcry.git
+    version: 1.0.0+git.commit.338758a71f7b15a726a063d8ce1bf443719cbe3c
 
   terminimal:
-    github: aca-labs/terminimal
+    git: https://github.com/aca-labs/terminimal.git
     version: 1.1.0
 
