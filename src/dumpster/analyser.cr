@@ -116,7 +116,7 @@ class Dumpster::Analyser
     locations.each do |location|
       # Build a series with cumulative instance counts at each GC generation.
       counts = counters.map(&.count location)
-      instance = counts.cumsum
+      instance = counts.accumulate(0_u32)
 
       # Ignore items with low total instance count
       next unless instance.last > min_instances
