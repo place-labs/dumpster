@@ -58,22 +58,28 @@ class Dumpster::Cli
     Terminimal.cursor.hide
 
     File.open(filename) do |file|
-      analyser = future { Analyser.parse file }
+      analyser = Channel(Analyser).new
+      spawn do
+        analyser.send(Analyser.parse(file))
+      end
 
       Terminimal.spinner await: analyser do
         percent_read = ((file.pos.to_f / file.size) * 100).to_i
         "Reading heap dump (#{percent_read}%)"
       end
-      heap = analyser.get
+      heap = analyser.receive
       print_heap_info heap
 
       puts
 
-      locations = future { heap.locations_of_interest }
+      locations = Channel(Set(String)).new
+      spawn do
+        locations.send(heap.locations_of_interest)
+      end
       Terminimal.spinner await: locations, message: "Analysing locations"
 
       puts "► Locations of interest"
-      locations.get.each do |(name, location), growth|
+      locations.receive.each do |(name, location), growth|
         puts "#{sprintf "% 10.2f", growth}  #{location} (#{name})"
       end
 
