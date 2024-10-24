@@ -22,5 +22,5 @@ shards:
 
   terminimal:
     git: https://github.com/aca-labs/terminimal.git
-    version: 1.2.0+git.commit.99a99cc3881dbd1cf15fafc7f992fadb88d70bd8
+    version: 1.2.0
 

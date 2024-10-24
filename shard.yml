@@ -13,7 +13,6 @@ license: MIT
 dependencies:
   terminimal:
     github: aca-labs/terminimal
-    branch: feat/crystal1.x
   linalg:
     github: konovod/linalg
   numcry:
