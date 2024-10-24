@@ -3,6 +3,7 @@ require "./analyser"
 require "terminimal"
 require "option_parser"
 require "errno"
+require "future"
 
 class Dumpster::Cli
   VERSION = "dumpster #{Dumpster::VERSION}"
@@ -42,14 +43,14 @@ class Dumpster::Cli
     end
 
     opts.invalid_option do |flag|
-      Terminimal.exit_with_error "unkown option '#{flag}'", Errno::EINVAL
+      Terminimal.exit_with_error "unkown option '#{flag}'", Errno::EINVAL.to_i
     end
 
     filename = ""
     opts.unknown_args do |args|
-      filename = args.first? || Terminimal.exit_with_error "no FILE specified", Errno::EINVAL
+      filename = args.first? || Terminimal.exit_with_error "no FILE specified", Errno::EINVAL.to_i
       unless File.exists? filename
-        Terminimal.exit_with_error "target FILE '#{filename}' does not exist", Errno::ENOENT
+        Terminimal.exit_with_error "target FILE '#{filename}' does not exist", Errno::ENOENT.to_i
       end
     end
 

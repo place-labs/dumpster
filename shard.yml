@@ -1,5 +1,5 @@
 name: dumpster
-version: 0.1.0
+version: 0.2.0
 
 authors:
   - Kim Burgess <kim@acaprojects.com>
@@ -7,8 +7,6 @@ authors:
 targets:
   dumpster:
     main: src/dumpster.cr
-
-crystal: 0.31.1
 
 license: MIT
 
@@ -20,3 +18,7 @@ dependencies:
   numcry:
     github: aca-labs/numcry
     branch: master
+  json_mapping:
+    github: crystal-lang/json_mapping.cr
+  future:
+    github: crystal-community/future.cr
