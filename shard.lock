@@ -14,7 +14,7 @@ shards:
 
   numcry:
     git: https://github.com/aca-labs/numcry.git
-    version: 1.0.0+git.commit.338758a71f7b15a726a063d8ce1bf443719cbe3c
+    version: 1.0.1+git.commit.e9480bd42690acf060c248bcb1832c30c8d39724
 
   simplepool:
     git: https://github.com/konovod/simplepool.git
